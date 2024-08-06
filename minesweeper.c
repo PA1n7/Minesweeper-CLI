@@ -167,7 +167,7 @@ bool zero_fix(){
         for(int x = 0; x<width; x++){
             if (mvinch(y, x) == zero){
                 int conf_changes[8][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, -1}, {-1, 1}, {1, 1}, {1, -1}};
-                for(int i = 0; i<4; i++){
+                for(int i = 0; i<8; i++){
                     int new_pos[2] = {y+conf_changes[i][0], x+conf_changes[i][1]};
                     if(mvinch(new_pos[0], new_pos[1]) != empty) continue;
                     added_zeroes = true;

@@ -238,7 +238,7 @@ void move_left(){
 
 void move_right(){
     reset_pos();
-    if (pos[1]<size*2.5-1){
+    if (pos[1]<width-1){
         pos[1]++;
     }
     save();
@@ -254,7 +254,7 @@ void move_up(){
 
 void move_down(){
     reset_pos();
-    if (pos[0]<size-1){
+    if (pos[0]<height-1){
         pos[0]++;
     }
     save();

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 void printing();
 void moving_and_sleeping();
@@ -13,8 +14,9 @@ void colouring();
 
 int pos[2] = {0, 0};
 chtype currPos = '#';
+chtype buff[5] = {'#', '#', '#', '#', '#'};
 int size = 20;
-int bombs = 8;
+int bombs = 20;
 int q;
 int width;
 int height;
@@ -23,8 +25,11 @@ int found = 0;
 bool revealed = false;
 
 void save(){
-    move(pos[0], pos[1]);
     currPos = mvinch(pos[0], pos[1]);
+    for (int i = 1; i<6; i++){
+        buff[i-1] = mvinch(pos[0], pos[1]+i);
+    }
+    move(pos[0], pos[1]);
 }
 
 void reset_pos(){
@@ -33,14 +38,12 @@ void reset_pos(){
     save();
 }
 
-// Fix for Tab clearnig part of screen
+// Fix for Tab cleaning part of screen
 void clear_tab(){
-    int i = 0;
-    chtype clearChar = ' ';
-    while(mvinch(pos[0], pos[1]+i) == clearChar){
+    for (int i = 0; i<6; i++){
         move(pos[0], pos[1]+i);
-        addch('#');
-        i++;
+        if(i == 0) addch(currPos);
+        if(i != 0) addch(buff[i-1]);
     }
     move(pos[0], pos[1]);
     refresh();
@@ -75,17 +78,29 @@ void reveal_all(){
         for (int x = 0; x<width; x++){
             move(y, x);
             if (board[y][x] == 0){
-                if (has_colors()) attron(COLOR_PAIR(OFF));
-                addstr(" ");
-                if(has_colors()) attroff(COLOR_PAIR(OFF));
+                if (has_colors()){
+                    attron(COLOR_PAIR(OFF));
+                    addstr(" ");
+                    attroff(COLOR_PAIR(OFF));
+                }else{
+                    addstr(" ");
+                }
             }else if(board[y][x] == -1){
-                if (has_colors()) attron(COLOR_PAIR(MINE));
-                addstr(" ");
-                if(has_colors()) attroff(COLOR_PAIR(MINE));            
+                if (has_colors()){
+                    attron(COLOR_PAIR(MINE));
+                    addstr(" ");
+                    attroff(COLOR_PAIR(MINE));
+                }else{
+                    addstr("!");
+                }
             }else{
-                if (has_colors()) attron(COLOR_PAIR(LAND));
-                addstr(" ");
-                if(has_colors()) attroff(COLOR_PAIR(LAND));
+                if (has_colors()){
+                    attron(COLOR_PAIR(LAND));
+                    addstr(" ");
+                    attroff(COLOR_PAIR(LAND));
+                }else{
+                    addstr("#");
+                }
             }
         }
     }
@@ -254,10 +269,10 @@ void start_screen(){
     init_colors();
     addstr("=====================================================\n");
     addstr("Instructions:\n");
-    addstr("Use the W, A, S, D keys to move.\n");
+    addstr("Use the W, A, S, D or the arrow keys to move.\n");
     addstr("To mark a bomb press the Space key.\n");
     addstr("To reveal a square use the Enter key.\n");
-    addstr("Use Q or Esc to quit.\n");
+    addstr("Use Q or press Esc twice to quit.\n");
     addstr("=====================================================\n");
     addstr("Press any key to start...");
     refresh();
@@ -274,10 +289,39 @@ void init_board(){
     }
 }
 
-int main(){
+int main(int argc, char *argv[]){
+    if (argc == 1) {
+        printf("Enter the size of map\nDefault=(%i):", size);
+        scanf("%i", &size);
+        printf("Enter the amount of mines\nDefault=(%i/%i):", bombs, (int)(size*size*2.5));
+        scanf("%i", &bombs);
+    }
+    if (argc > 4){
+        printf("Too many arguments given\n");
+        return 0;
+    }
+    if (argc == 2 && strcmp(argv[1], "h") == 0){
+        printf("Help Menu\n");
+        printf("\n");
+        printf("Syntax\n");
+        printf("\n");
+        printf("./minesweeper <size>                    //Defaults bomb count 10%% of size\n");
+        printf("./minesweeper <size> <bomb>             //Defaults width to 250%% of height\n");
+        printf("./minesweeper <width> <height> <bomb>   //Doesn't assume anything\n");
+        printf("\n");
+        return 0;
+    }
+    if (argc == 2 || argc == 3) size = atoi(argv[1]);
     srand(time(0));
     width = size*2.5;
     height = size;
+    if (argc != 1) bombs = (int)(width*height) / 10;
+    if (argc == 3) bombs = atoi(argv[2]);
+    if (argc == 4) {
+        width = atoi(argv[1]);
+        height = atoi(argv[2]);
+        bombs = atoi(argv[3]);
+    }
     int board[height][width];
     init_board();
     initscr();
@@ -299,20 +343,20 @@ int main(){
             posY = rand()%height;
             posX = rand()%width;
         }
-        board[rand()%height][rand()%width] = -2;
-    }
-    int poss[8][2] = {{0, 0}, {0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}, {2, 2}};
-    for(int i = 0; i<8; i++){
-        board[poss[i][0]][poss[i][1]] = -1;
+        board[rand()%height][rand()%width] = -1;
     }
     clear_board(board);
     refresh();
     move(pos[0], pos[1]);
     char str[3];
-    while(q != 113 && q != 27)
+    
+    int cmds[3] = {0, 0, 0};
+    while(q != 113)
     {
         q = getch();
-        sprintf(str, "%d", q);
+        cmds[2] = cmds[1];
+        cmds[1] = cmds[0];
+        cmds[0] = q;
         if (q == 10) {
             check();
             reset_pos();
@@ -329,8 +373,23 @@ int main(){
             move_right();
         } else if (q == 9){
             clear_tab();
-        } else{
+        }else{
+            clear_tab();
             reset_pos();
+        }
+        if (cmds[1] == 0x5B && cmds[2] == 0x1B){
+            if (cmds[0] == 0x42){
+                move_down();
+            }else if(cmds[0] == 0x44){
+                move_left();
+            }else if(cmds[0] == 0x43){
+                move_right();
+            }else if(cmds[0] == 0x41){
+                move_up();
+            }
+        }
+        if(cmds[1] == 0x1B && cmds[0] != 0x5B){
+            break;
         }
         refresh();
    }

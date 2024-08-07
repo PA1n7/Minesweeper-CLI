@@ -2,7 +2,11 @@
 
 Basic Minesweeper program in C
 
-Syntax
+**Tested in Linux**
+
+**Couldn't run in Windows (no ncurses library, failed to compile)**
+
+Usage 
 
 >./minesweeper size                  //Defaults bomb count 10% of size
 >

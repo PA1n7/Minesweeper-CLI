@@ -166,18 +166,20 @@ bool zero_fix(){
     for(int y = 0; y<height; y++){
         for(int x = 0; x<width; x++){
             if (mvinch(y, x) == zero){
-                int conf_changes[8][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, -1}, {-1, 1}, {1, 1}, {1, -1}};
-                for(int i = 0; i<8; i++){
-                    int new_pos[2] = {y+conf_changes[i][0], x+conf_changes[i][1]};
-                    if(mvinch(new_pos[0], new_pos[1]) != empty) continue;
-                    added_zeroes = true;
-                    if (check_aval(new_pos)){
-                        move(new_pos[0], new_pos[1]);
-                        int to_wr = board[new_pos[0]][new_pos[1]];
-                        if (to_wr == 0){
-                            addstr(" ");
-                        }else{
-                            put_num(to_wr);
+                for (int posY = y - 1; posY < y + 2; posY++)
+                {
+                    for (int posX = x - 1; posX < x+2; posX++){
+                        int new_pos[2] = {posY, posX};
+                        if(mvinch(posY, posX) != empty) continue;
+                        added_zeroes =true;
+                        if (check_aval(new_pos)){ 
+                            move(posY, posX);
+                            int to_wr = board[new_pos[0]][new_pos[1]];
+                            if (to_wr == 0){
+                                addstr(" ");
+                            }else{
+                                put_num(to_wr);
+                            }
                         }
                     }
                 }

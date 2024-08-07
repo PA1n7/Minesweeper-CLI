@@ -22,6 +22,9 @@ int width;
 int height;
 int board[100][100];
 int found = 0;
+int marked = 0;
+time_t begin;
+int max_score = 10000;
 bool revealed = false;
 
 void save(){
@@ -113,6 +116,20 @@ void won(){
     addstr(" \\ V / | | | | | |  \\ \\ /\\ / / | | |  \\| | |\n");
     addstr("  | || |_| | |_| |   \\ V  V /| |_| | |\\  |_|\n");
     addstr("  |_| \\___/ \\___/     \\_/\\_/  \\___/|_| \\_(_)\n");
+    time_t end = time(NULL);
+    int diff = end-begin;
+    char str[50];
+    sprintf(str, "%d", diff);
+    float D = (float)bombs/(width*height);
+    int score =max_score* D/diff;
+    char sstr[50];
+    sprintf(sstr, "%d", score);
+    addstr("Time: ");
+    addstr(str);
+    addstr("s\n");
+    addstr("Score: ");
+    addstr(sstr);
+    addstr("\n");
     addstr("Press q or escape to quit...");
     refresh();
 }
@@ -122,12 +139,14 @@ void mark(){
     chtype back = mvinch(pos[0], pos[1]);
     if (back == cc){
         if (board[pos[0]][pos[1]] == -1) found--;
+        marked--;
         addch(empty);
     }else if (back == empty){
         if (board[pos[0]][pos[1]] == -1) found++;
+        marked++;
         addch(cc);
     }
-    if (found == bombs){
+    if (found == bombs && marked == found){
         reveal_all();
         won();
     }
@@ -341,13 +360,17 @@ int main(int argc, char *argv[]){
     for (int i = 0; i<bombs; i++){
         int posY = rand()%height;
         int posX = rand()%width;
-        while (board[posY][posX] == -1){
+        int checker[2] = {posY, posX};
+        while (board[posY][posX] == -1 || check_aval(checker) == false){
             posY = rand()%height;
             posX = rand()%width;
+            checker[0] = posY;
+            checker[1] = posX;
         }
         board[rand()%height][rand()%width] = -1;
     }
     clear_board(board);
+    begin = time(NULL);
     refresh();
     move(pos[0], pos[1]);
     char str[3];

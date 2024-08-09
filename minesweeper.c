@@ -208,6 +208,16 @@ bool zero_fix(){
     return added_zeroes;
 }
 
+int count_bombs(int board[height][width]){
+    int count = 0;
+    for(int y = 0; y<height; y++){
+        for(int x = 0; x<width; x++){
+            if (board[y][x] == -1) count++;
+        }
+    }
+    return count;
+}
+
 void lost(){
     reveal_all();
     move(height, 0);
@@ -357,7 +367,7 @@ int main(int argc, char *argv[]){
         addstr("\n");
         refresh();
     }
-    for (int i = 0; i<bombs; i++){
+    while (count_bombs(board) != bombs){
         int posY = rand()%height;
         int posX = rand()%width;
         int checker[2] = {posY, posX};
@@ -367,7 +377,7 @@ int main(int argc, char *argv[]){
             checker[0] = posY;
             checker[1] = posX;
         }
-        board[rand()%height][rand()%width] = -1;
+        board[posY][posX] = -1;
     }
     clear_board(board);
     begin = time(NULL);

@@ -231,6 +231,20 @@ void lost(){
     refresh();
 }
 
+bool only_mines_left(){
+    chtype empty = '#';
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            if (mvinch(y, x) == empty && board[y][x] != -1){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 void check(){
     chtype available = '#';
     if (revealed != true){
@@ -246,6 +260,11 @@ void check(){
         }
         else{
             put_num(count);
+        }
+        if (only_mines_left())
+        {
+            reveal_all();
+            won();
         }
         save();
     }

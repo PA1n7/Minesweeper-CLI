@@ -232,6 +232,7 @@ void lost(){
 }
 
 void check(){
+    chtype available = '#';
     if (revealed != true){
         int count = board[pos[0]][pos[1]];
         char str[2];
@@ -393,7 +394,8 @@ int main(int argc, char *argv[]){
         cmds[1] = cmds[0];
         cmds[0] = q;
         if (q == 10) {
-            check();
+            chtype empty = '#';
+            if (mvinch(pos[0], pos[1]) == empty) check();
             reset_pos();
         } else if (q == 32) {
             reset_pos();

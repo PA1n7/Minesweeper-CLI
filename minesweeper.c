@@ -26,6 +26,9 @@ int marked = 0;
 time_t begin;
 int max_score = 10000;
 bool revealed = false;
+chtype empty = '#';
+chtype cc = '!';
+chtype zero = ' ';
 
 void save(){
     currPos = mvinch(pos[0], pos[1]);
@@ -134,8 +137,6 @@ void won(){
     refresh();
 }
 void mark(){
-    chtype cc = '!';
-    chtype empty = '#';
     chtype back = mvinch(pos[0], pos[1]);
     if (back == cc){
         if (board[pos[0]][pos[1]] == -1) found--;
@@ -179,8 +180,6 @@ void put_num(int num){
 
 
 bool zero_fix(){
-    chtype empty =  '#';
-    chtype zero = ' ';
     bool added_zeroes = false;
     for(int y = 0; y<height; y++){
         for(int x = 0; x<width; x++){
@@ -232,7 +231,6 @@ void lost(){
 }
 
 bool only_mines_left(){
-    chtype empty = '#';
     for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
@@ -246,7 +244,6 @@ bool only_mines_left(){
 }
 
 void check(){
-    chtype available = '#';
     if (revealed != true){
         int count = board[pos[0]][pos[1]];
         char str[2];
@@ -261,7 +258,7 @@ void check(){
         else{
             put_num(count);
         }
-        if (only_mines_left())
+        if (only_mines_left() && !revealed)
         {
             reveal_all();
             won();
@@ -413,7 +410,6 @@ int main(int argc, char *argv[]){
         cmds[1] = cmds[0];
         cmds[0] = q;
         if (q == 10) {
-            chtype empty = '#';
             if (mvinch(pos[0], pos[1]) == empty) check();
             reset_pos();
         } else if (q == 32) {
